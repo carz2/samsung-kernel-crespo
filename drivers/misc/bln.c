@@ -259,7 +259,7 @@ static DEVICE_ATTR(blink_control, S_IRUGO | S_IWUGO, blink_control_read,
 static DEVICE_ATTR(enabled, S_IRUGO | S_IWUGO,
 		backlightnotification_status_read,
 		backlightnotification_status_write);
-static DEVICE_ATTR(notification_led, S_IRUGO | S_IWUGO,
+static DEVICE_ATTR(led, S_IRUGO | S_IWUGO,
 		notification_led_status_read,
 		notification_led_status_write);
 static DEVICE_ATTR(in_kernel_blink, S_IRUGO | S_IWUGO,
@@ -276,7 +276,7 @@ static DEVICE_ATTR(version, S_IRUGO , backlightnotification_version, NULL);
 static struct attribute *bln_notification_attributes[] = {
 	&dev_attr_blink_control.attr,
 	&dev_attr_enabled.attr,
-	&dev_attr_notification_led.attr,
+	&dev_attr_led.attr,
 	&dev_attr_in_kernel_blink.attr,
 	&dev_attr_blink_interval.attr,
 	&dev_attr_max_blink_count.attr,
@@ -290,7 +290,7 @@ static struct attribute_group bln_notification_group = {
 
 static struct miscdevice bln_device = {
 	.minor = MISC_DYNAMIC_MINOR,
-	.name = "backlightnotification",
+	.name = "notification",
 };
 
 void register_bln_implementation(struct bln_implementation *imp)
