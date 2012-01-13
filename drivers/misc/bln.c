@@ -23,7 +23,7 @@ static bool bln_ongoing = false; /* ongoing LED Notification */
 static int bln_blink_state = 0;
 static bool bln_suspended = false; /* is system suspended */
 static struct bln_implementation *bln_imp = NULL;
-static bool in_kernel_blink = false;
+static bool in_kernel_blink = true;
 static uint32_t blink_count;
 
 static struct wake_lock bln_wake_lock;
@@ -35,7 +35,7 @@ static void blink_callback(struct work_struct *blink_work);
 static DECLARE_WORK(blink_work, blink_callback);
 
 static uint32_t blink_interval = 750;	/* on / off every 750ms */
-static uint32_t max_blink_count = 600;  /* 10 minutes */
+static uint32_t blinktimeout = 600;  /* 10 minutes */
 
 #define BACKLIGHTNOTIFICATION_VERSION 9
 
@@ -78,7 +78,7 @@ static void enable_led_notification(void)
 		/* Start timer */
 		blink_timer.expires = jiffies +
 				msecs_to_jiffies(blink_interval);
-		blink_count = max_blink_count;
+		blink_count = blinktimeout;
 		add_timer(&blink_timer);
 	}
 
@@ -198,19 +198,19 @@ static ssize_t blink_interval_status_write(struct device *dev,
 	return size;
 }
 
-static ssize_t max_blink_count_status_read(struct device *dev,
+static ssize_t blinktimeout_status_read(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	return sprintf(buf,"%u\n", max_blink_count);
+	return sprintf(buf,"%u\n", blinktimeout);
 }
 
-static ssize_t max_blink_count_status_write(struct device *dev,
+static ssize_t blinktimeout_status_write(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t size)
 {
 	unsigned int data;
 
 	if (sscanf(buf, "%u\n", &data) == 1)
-		max_blink_count = data;
+		blinktimeout = data;
 	else
 		pr_info("%s: input error\n", __FUNCTION__);
 
@@ -268,9 +268,9 @@ static DEVICE_ATTR(in_kernel_blink, S_IRUGO | S_IWUGO,
 static DEVICE_ATTR(blink_interval, S_IRUGO | S_IWUGO,
 		blink_interval_status_read,
 		blink_interval_status_write);
-static DEVICE_ATTR(max_blink_count, S_IRUGO | S_IWUGO,
-		max_blink_count_status_read,
-		max_blink_count_status_write);
+static DEVICE_ATTR(blinktimeout, S_IRUGO | S_IWUGO,
+		blinktimeout_status_read,
+		blinktimeout_status_write);
 static DEVICE_ATTR(version, S_IRUGO , backlightnotification_version, NULL);
 
 static struct attribute *bln_notification_attributes[] = {
@@ -279,7 +279,7 @@ static struct attribute *bln_notification_attributes[] = {
 	&dev_attr_led.attr,
 	&dev_attr_in_kernel_blink.attr,
 	&dev_attr_blink_interval.attr,
-	&dev_attr_max_blink_count.attr,
+	&dev_attr_blinktimeout.attr,
 	&dev_attr_version.attr,
 	NULL
 };
