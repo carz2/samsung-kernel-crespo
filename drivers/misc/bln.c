@@ -28,9 +28,9 @@ static uint32_t blink_count;
 
 static struct wake_lock bln_wake_lock;
 
-void bl_timer_callback(unsigned long data);
+void blink_timer_callback(unsigned long data);
 static struct timer_list blink_timer =
-		TIMER_INITIALIZER(bl_timer_callback, 0, 0);
+		TIMER_INITIALIZER(blink_timer_callback, 0, 0);
 static void blink_callback(struct work_struct *blink_work);
 static DECLARE_WORK(blink_work, blink_callback);
 
@@ -324,7 +324,7 @@ static void blink_callback(struct work_struct *blink_work)
 	bln_blink_state = !bln_blink_state;
 }
 
-void bl_timer_callback(unsigned long data)
+void blink_timer_callback(unsigned long data)
 {
 	schedule_work(&blink_work);
 	mod_timer(&blink_timer, jiffies + msecs_to_jiffies(blink_interval));
