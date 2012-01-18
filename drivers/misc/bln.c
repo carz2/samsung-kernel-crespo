@@ -254,7 +254,8 @@ static ssize_t backlightnotification_version(struct device *dev,
 	return sprintf(buf, "%u\n", BACKLIGHTNOTIFICATION_VERSION);
 }
 
-static DEVICE_ATTR(blink_control, S_IRUGO | S_IWUGO, blink_control_read,
+static DEVICE_ATTR(blink_control, S_IRUGO | S_IWUGO,
+		blink_control_read,
 		blink_control_write);
 static DEVICE_ATTR(enabled, S_IRUGO | S_IWUGO,
 		backlightnotification_status_read,
