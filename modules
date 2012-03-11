@@ -1,0 +1,11 @@
+#!/bin/bash
+
+export KERNEL_DIR=$PWD
+
+cp -f $KERNEL_DIR/arch/arm/boot/zImage ~/androidcarz4.0.3/system/device/samsung/crespo/kernel > /dev/null
+
+find $KERNEL_DIR -name bcm4329.ko -exec cp -f '{}' ~/androidcarz4.0.3/system/device/samsung/crespo/ \; > /dev/null
+
+find $KERNEL_DIR -name scsi_wait_scan.ko -exec cp -f '{}' ~/androidcarz4.0.3/system/device/samsung/crespo/ \; > /dev/null
+
+exit #
