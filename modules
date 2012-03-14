@@ -4,8 +4,22 @@ export KERNEL_DIR=$PWD
 
 cp -f $KERNEL_DIR/arch/arm/boot/zImage ~/androidcarz4.0.3/system/device/samsung/crespo/kernel > /dev/null
 
-find $KERNEL_DIR -name bcm4329.ko -exec cp -f '{}' ~/androidcarz4.0.3/system/device/samsung/crespo/ \; > /dev/null
+find $KERNEL_DIR -name bcm4329.ko -exec cp -f '{}' ~/androidcarz4.0.3/system/device/samsung/crespo/modules/ \; > /dev/null
 
-find $KERNEL_DIR -name scsi_wait_scan.ko -exec cp -f '{}' ~/androidcarz4.0.3/system/device/samsung/crespo/ \; > /dev/null
+find $KERNEL_DIR -name cifs.ko -exec cp -f '{}' ~/androidcarz4.0.3/system/device/samsung/crespo/modules/ \; > /dev/null
+
+find $KERNEL_DIR -name exportfs.ko -exec cp -f '{}' ~/androidcarz4.0.3/system/device/samsung/crespo/modules/ \; > /dev/null
+
+find $KERNEL_DIR -name lockd.ko -exec cp -f '{}' ~/androidcarz4.0.3/system/device/samsung/crespo/modules/ \; > /dev/null
+
+find $KERNEL_DIR -name nfs.ko -exec cp -f '{}' ~/androidcarz4.0.3/system/device/samsung/crespo/modules/ \; > /dev/null
+
+find $KERNEL_DIR -name ntfs.ko -exec cp -f '{}' ~/androidcarz4.0.3/system/device/samsung/crespo/modules/ \; > /dev/null
+
+find $KERNEL_DIR -name nfsd.ko -exec cp -f '{}' ~/androidcarz4.0.3/system/device/samsung/crespo/modules/ \; > /dev/null
+
+find $KERNEL_DIR -name scsi_wait_scan.ko -exec cp -f '{}' ~/androidcarz4.0.3/system/device/samsung/crespo/modules/ \; > /dev/null
+
+find $KERNEL_DIR -name sunrpc.ko -exec cp -f '{}' ~/androidcarz4.0.3/system/device/samsung/crespo/modules/ \; > /dev/null
 
 exit #
