@@ -121,13 +121,18 @@ struct s5pv210_dvs_conf {
 	unsigned long	int_volt; /* uV */
 };
 
-const unsigned long arm_volt_max = 1550000;
+#ifdef CONFIG_CUSTOM_VOLTAGE
+unsigned long arm_volt_max = 1450000;
+unsigned long int_volt_max = 1250000;
+#else
+const unsigned long arm_volt_max = 1450000;
 const unsigned long int_volt_max = 1250000;
+#endif
 
 static struct s5pv210_dvs_conf dvs_conf[] = {
 	[L0] = {
-		.arm_volt   = 1350000,
-		.int_volt   = 1175000,
+		.arm_volt   = 1450000,
+		.int_volt   = 1250000,
 	},
 	[L1] = {
 		.arm_volt   = 1350000,
@@ -163,8 +168,8 @@ static u32 clkdiv_val[SpeedSteeps][11] = {
 	 *   ONEDRAM, MFC, G3D }
 	 */
 
-    /* L0 : [1200/200/200/100][166/83][133/66][200/200] */
-    {0, 5, 5, 1, 3, 1, 4, 1, 3, 0, 0},
+	/* L0 : [1400/200/100][166/83][133/66][200/200] */
+	{0, 6, 6, 1, 3, 1, 4, 1, 3, 0, 0},
 
 	/* L1 : [1200/200/100][166/83][133/66][200/200] */
 	{0, 5, 5, 1, 3, 1, 4, 1, 3, 0, 0},
@@ -238,7 +243,7 @@ static int s5pv210_target(struct cpufreq_policy *policy,
 			  unsigned int relation)
 {
 	unsigned long reg;
-	unsigned int index, priv_index;
+	unsigned int index;
 	unsigned int pll_changing = 0;
 	unsigned int bus_speed_changing = 0;
 	unsigned int arm_volt, int_volt;
@@ -288,13 +293,6 @@ static int s5pv210_target(struct cpufreq_policy *policy,
 	if (freqs.new == freqs.old)
 		goto out;
 
-	/* Finding current running level index */
-	if (cpufreq_frequency_table_target(policy, s5pv210_freq_table,
-					   freqs.old, relation, &priv_index)) {
-		ret = -EINVAL;
-		goto out;
-	}
-
 	arm_volt = dvs_conf[index].arm_volt;
 	int_volt = dvs_conf[index].int_volt;
 
@@ -329,7 +327,11 @@ static int s5pv210_target(struct cpufreq_policy *policy,
 		 * temporary clock while changing divider.
 		 * expected clock is 83Mhz : 7.8usec/(1/83Mhz) = 0x287
 		 */
-		s5pv210_set_refresh(DMC1, 100000);
+		if (pll_changing)
+			s5pv210_set_refresh(DMC1, 83000);
+		else
+			s5pv210_set_refresh(DMC1, 100000);
+
 		s5pv210_set_refresh(DMC0, 83000);
 	}
 
@@ -431,14 +433,7 @@ static int s5pv210_target(struct cpufreq_policy *policy,
 		 * 6-1. Set PMS values
 		 * 6-2. Wait untile the PLL is locked
 		 */
-		if (index == L0)
-			__raw_writel(APLL_VAL_1200, S5P_APLL_CON);
-		else if (index == L1)
-			__raw_writel(APLL_VAL_1100, S5P_APLL_CON);
-		else if (index == L2)
-			__raw_writel(APLL_VAL_1000, S5P_APLL_CON);
-        else
-			__raw_writel(APLL_VAL_800, S5P_APLL_CON);
+		__raw_writel(sAPLL_confs[index], S5P_APLL_CON);
 
 		do {
 			reg = __raw_readl(S5P_APLL_CON);
@@ -570,6 +565,8 @@ static int __init s5pv210_cpu_init(struct cpufreq_policy *policy)
 {
 	unsigned long mem_type;
 
+	int ret;
+
 	cpu_clk = clk_get(NULL, "armclk");
 	if (IS_ERR(cpu_clk))
 		return PTR_ERR(cpu_clk);
@@ -614,11 +611,12 @@ static int __init s5pv210_cpu_init(struct cpufreq_policy *policy)
 
 	policy->cpuinfo.transition_latency = 40000;
 
-	cpufreq_frequency_table_cpuinfo(policy, s5pv210_freq_table);
-	/* set default min and max policies to safe speeds */
-	policy->max = 1000000;
-	policy->min = 200000;
-	return 0;
+	ret = cpufreq_frequency_table_cpuinfo(policy, s5pv210_freq_table);
+
+	if (!ret)
+	    policy->max = 1000000;
+
+	return ret;
 }
 
 static int s5pv210_cpufreq_notifier_event(struct notifier_block *this,
@@ -655,6 +653,11 @@ static int s5pv210_cpufreq_reboot_notifier_event(struct notifier_block *this,
 	return NOTIFY_DONE;
 }
 
+static struct freq_attr *s5pv210_cpufreq_attr[] = {
+	&cpufreq_freq_attr_scaling_available_freqs,
+	NULL,
+};
+
 static struct cpufreq_driver s5pv210_driver = {
 	.flags		= CPUFREQ_STICKY,
 	.verify		= s5pv210_verify_speed,
@@ -662,7 +665,7 @@ static struct cpufreq_driver s5pv210_driver = {
 	.get		= s5pv210_getspeed,
 	.init		= s5pv210_cpu_init,
 	.name		= "s5pv210",
-        .attr       = s5pv210_cpufreq_attr,
+	.attr		= s5pv210_cpufreq_attr,
 #ifdef CONFIG_PM
 	.suspend	= s5pv210_cpufreq_suspend,
 	.resume		= s5pv210_cpufreq_resume,
