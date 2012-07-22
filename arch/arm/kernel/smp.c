@@ -461,7 +461,9 @@ asmlinkage void __exception_irq_entry do_local_timer(struct pt_regs *regs)
 
 	if (local_timer_ack()) {
 		__inc_irq_stat(cpu, local_timer_irqs);
+		irq_enter();
 		ipi_timer();
+		irq_exit();
 	}
 
 	set_irq_regs(old_regs);
@@ -623,31 +625,31 @@ asmlinkage void __exception_irq_entry do_IPI(int ipinr, struct pt_regs *regs)
 
 	switch (ipinr) {
 	case IPI_TIMER:
-        irq_enter();
+		irq_enter();
 		ipi_timer();
-        irq_exit();
-        break;
+		irq_exit();
+		break;
 
 	case IPI_RESCHEDULE:
 		scheduler_ipi();
 		break;
 
 	case IPI_CALL_FUNC:
-        irq_enter();
+		irq_enter();
 		generic_smp_call_function_interrupt();
-        irq_exit();
+		irq_exit();
 		break;
 
 	case IPI_CALL_FUNC_SINGLE:
-        irq_enter();
+		irq_enter();
 		generic_smp_call_function_single_interrupt();
-        irq_exit();
+		irq_exit();
 		break;
 
 	case IPI_CPU_STOP:
-        irq_enter();
+		irq_enter();
 		ipi_cpu_stop(cpu);
-        irq_exit();
+		irq_exit();
 		break;
 
 	case IPI_CPU_BACKTRACE:
