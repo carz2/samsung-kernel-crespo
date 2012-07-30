@@ -38,7 +38,6 @@ static int dhd_dongle_up = FALSE;
 #include <dhdioctl.h>
 #include <wlioctl.h>
 #include <dhd_cfg80211.h>
-#include <wl_dbg.h>
 
 static s32 wl_dongle_up(struct net_device *ndev, u32 up);
 
@@ -77,7 +76,7 @@ s32 dhd_cfg80211_set_p2p_info(struct wl_priv *wl, int val)
 	char iovbuf[30];
 
 	dhd->op_mode |= val;
-	WL_ERROR(("Set : op_mode=%d\n", dhd->op_mode));
+	WL_ERR(("Set : op_mode=%d\n", dhd->op_mode));
 
 #ifdef ARP_OFFLOAD_SUPPORT
 	/* IF P2P is enabled, disable arpoe */
@@ -102,7 +101,7 @@ s32 dhd_cfg80211_clean_p2p_info(struct wl_priv *wl)
 	char iovbuf[30];
 
 	dhd->op_mode &= ~CONCURENT_MASK;
-	WL_ERROR(("Clean : op_mode=%d\n", dhd->op_mode));
+	WL_ERR(("Clean : op_mode=%d\n", dhd->op_mode));
 
 #ifdef ARP_OFFLOAD_SUPPORT
 	/* IF P2P is disabled, enable arpoe back for STA mode. */
@@ -125,7 +124,7 @@ static s32 wl_dongle_up(struct net_device *ndev, u32 up)
 
 	err = wldev_ioctl(ndev, WLC_UP, &up, sizeof(up), true);
 	if (unlikely(err)) {
-		WL_ERROR(("WLC_UP error (%d)\n", err));
+		WL_ERR(("WLC_UP error (%d)\n", err));
 	}
 	return err;
 }
@@ -140,7 +139,7 @@ s32 dhd_config_dongle(struct wl_priv *wl, bool need_lock)
 
 	WL_TRACE(("In\n"));
 	if (dhd_dongle_up) {
-		WL_ERROR(("Dongle is already up\n"));
+		WL_ERR(("Dongle is already up\n"));
 		return err;
 	}
 
@@ -151,7 +150,7 @@ s32 dhd_config_dongle(struct wl_priv *wl, bool need_lock)
 
 	err = wl_dongle_up(ndev, 0);
 	if (unlikely(err)) {
-		WL_ERROR(("wl_dongle_up failed\n"));
+		WL_ERR(("wl_dongle_up failed\n"));
 		goto default_conf_out;
 	}
 	dhd_dongle_up = true;
@@ -252,7 +251,7 @@ static bool btcoex_is_sco_active(struct net_device *dev)
 			__FUNCTION__, i, param27));
 
 		if (ioc_res < 0) {
-			WL_ERROR(("%s ioc read btc params error\n", __FUNCTION__));
+			WL_ERR(("%s ioc read btc params error\n", __FUNCTION__));
 			break;
 		}
 
@@ -315,7 +314,7 @@ static int set_btc_esco_params(struct net_device *dev, bool trump_sco)
 				  __FUNCTION__, saved_reg50, saved_reg51,
 				  saved_reg64, saved_reg65, saved_reg71));
 		} else {
-			WL_ERROR((":%s: save btc_params failed\n",
+			WL_ERR((":%s: save btc_params failed\n",
 				__FUNCTION__));
 			saved_status = FALSE;
 			return -1;
@@ -369,7 +368,7 @@ static int set_btc_esco_params(struct net_device *dev, bool trump_sco)
 
 		saved_status = FALSE;
 	} else {
-		WL_ERROR((":%s att to restore not saved BTCOEX params\n",
+		WL_ERR((":%s att to restore not saved BTCOEX params\n",
 			__FUNCTION__));
 		return -1;
 	}
@@ -478,7 +477,7 @@ btc_coex_idle:
 			break;
 
 		default:
-			WL_ERROR(("%s error g_status=%d !!!\n", __FUNCTION__,
+			WL_ERR(("%s error g_status=%d !!!\n", __FUNCTION__,
 				btcx_inf->bt_state));
 			if (btcx_inf->dev)
 				wl_cfg80211_bt_setflag(btcx_inf->dev, FALSE);
@@ -596,7 +595,7 @@ int wl_cfg80211_set_btcoex_dhcp(struct net_device *dev, char *command)
 #endif /* COEX_DHCP */
 		}
 		else if (saved_status == TRUE) {
-			WL_ERROR(("%s was called w/o DHCP OFF. Continue\n", __FUNCTION__));
+			WL_ERR(("%s was called w/o DHCP OFF. Continue\n", __FUNCTION__));
 		}
 	}
 	else if (strnicmp((char *)&powermode_val, "2", strlen("2")) == 0) {
@@ -645,7 +644,7 @@ int wl_cfg80211_set_btcoex_dhcp(struct net_device *dev, char *command)
 
 	}
 	else {
-		WL_ERROR(("%s Unkwown yet power setting, ignored\n",
+		WL_ERR(("%s Unkwown yet power setting, ignored\n",
 			__FUNCTION__));
 	}
 
