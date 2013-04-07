@@ -4,6 +4,6 @@ export KERNEL_DIR=$PWD
 
 cp -f $KERNEL_DIR/arch/arm/boot/zImage /media/carz2/Android/androidcarzjb/system/device/samsung/crespo/kernel > /dev/null
 
-find $KERNEL_DIR -name scsi_wait_scan.ko -exec cp -f '{}' /media/carz2/Android/androidcarzjb/system/device/samsung/crespo/modules/ \; > /dev/null
+cp -f $KERNEL_DIR/drivers/scsi/scsi_wait_scan.ko /media/carz2/Android/androidcarzjb/system/device/samsung/crespo/modules/scsi_wait_scan.ko > /dev/null
 
 exit #
